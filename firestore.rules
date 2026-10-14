@@ -1,0 +1,79 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+        && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    match /admins/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow write: if false;
+    }
+
+    match /sidebrothers/{documentId} {
+      allow read: if documentId == 'main_data'
+        && (
+          isAdmin()
+          || !exists(/databases/$(database)/documents/sidebrothers/main_data)
+          || resource.data.keys().hasOnly(['members', 'donation', 'general'])
+        );
+      allow create, update, delete: if documentId == 'main_data' && isAdmin();
+    }
+
+    match /inquiries/{inquiryId} {
+      allow create: if request.resource.data.keys().hasAll([
+          'name', 'email', 'company', 'budget', 'message', 'date', 'isRead', 'createdAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'name', 'email', 'company', 'budget', 'message', 'date', 'isRead', 'createdAt'
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 120
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 254
+        && request.resource.data.company is string
+        && request.resource.data.company.size() <= 160
+        && request.resource.data.budget is string
+        && request.resource.data.budget.size() <= 80
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 3000
+        && request.resource.data.date is string
+        && request.resource.data.isRead == false
+        && request.resource.data.createdAt == request.time;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /donationRequests/{requestId} {
+      allow create: if request.resource.data.keys().hasAll([
+          'name', 'amount', 'message', 'method', 'date', 'status', 'createdAt'
+        ])
+        && request.resource.data.keys().hasOnly([
+          'name', 'amount', 'message', 'method', 'date', 'status', 'createdAt'
+        ])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 120
+        && request.resource.data.amount is int
+        && request.resource.data.amount >= 5000
+        && request.resource.data.amount <= 50000000
+        && request.resource.data.message is string
+        && request.resource.data.message.size() <= 1000
+        && request.resource.data.method == 'QRIS Instant'
+        && request.resource.data.date is string
+        && request.resource.data.status == 'pending'
+        && request.resource.data.createdAt == request.time;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /donors/{donorId} {
+      allow read: if isAdmin() || resource.data.status == 'approved';
+      allow create, update, delete: if isAdmin();
+    }
+  }
+}

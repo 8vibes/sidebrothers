@@ -54,6 +54,7 @@
         }
         .text-gradient {
             background: linear-gradient(135deg, #FFE600 0%, #FF3333 100%);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -552,7 +553,7 @@
 
             <button onclick="confirmQRPayment()" class="mt-5 w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-extrabold text-sm shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center space-x-2">
                 <i class="fa-solid fa-circle-check"></i>
-                <span>Saya Sudah Bayar / Konfirmasi</span>
+                <span>Kirim Konfirmasi untuk Verifikasi</span>
             </button>
         </div>
     </div>
@@ -576,24 +577,12 @@
                 </button>
             </div>
 
-            <!-- Default Credentials Notice Banner -->
-            <div class="bg-brand-dark/90 border border-brand-yellow/30 p-3 rounded-2xl text-xs space-y-1">
-                <div class="text-brand-yellow font-bold flex items-center space-x-1.5">
-                    <i class="fa-solid fa-key text-xs"></i>
-                    <span>Kredensial Default:</span>
-                </div>
-                <div class="text-gray-300 font-mono text-[11px] flex justify-between">
-                    <span>Username: <strong class="text-white">admin</strong></span>
-                    <span>Password: <strong class="text-white">admin123</strong></span>
-                </div>
-            </div>
-
             <form onsubmit="handleAdminLogin(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-300 mb-1.5">Username Admin</label>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1.5">Email Admin</label>
                     <div class="relative">
                         <i class="fa-solid fa-user absolute left-3.5 top-3.5 text-gray-500 text-xs"></i>
-                        <input type="text" id="login-username" required placeholder="Masukkan username..." class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-white text-xs focus:outline-none focus:border-brand-yellow transition-all">
+                        <input type="email" id="login-email" required autocomplete="username" placeholder="admin@email.com" class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-white text-xs focus:outline-none focus:border-brand-yellow transition-all">
                     </div>
                 </div>
 
@@ -601,7 +590,7 @@
                     <label class="block text-xs font-semibold text-gray-300 mb-1.5">Password</label>
                     <div class="relative">
                         <i class="fa-solid fa-key absolute left-3.5 top-3.5 text-gray-500 text-xs"></i>
-                        <input type="password" id="login-password" required placeholder="Masukkan password..." class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-white text-xs focus:outline-none focus:border-brand-yellow transition-all">
+                        <input type="password" id="login-password" required autocomplete="current-password" placeholder="Masukkan password..." class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-white text-xs focus:outline-none focus:border-brand-yellow transition-all">
                     </div>
                 </div>
 
@@ -881,22 +870,19 @@
         };
 
         const initialDonors = [
-            { id: 'd1', name: 'Budi Marapthon', amount: 100000, message: 'Semangat bang Tepe & kawan-kawan sofa!', date: '2 jam lalu' },
-            { id: 'd2', name: 'SofaEnjoyer', amount: 250000, message: 'Kalian gokil dari S2 ampe sekarang!', date: '5 jam lalu' },
-            { id: 'd3', name: 'Anonimous', amount: 50000, message: 'Salam dari fans Niko Junius!', date: '1 hari lalu' }
+            // Donor hanya ditampilkan setelah transaksi tercatat di Firestore.
         ];
 
-        const initialInquiries = [
-            { id: 'b1', name: 'Rian Pratama', email: 'rian@brandlokal.id', company: 'Brand Apparel X', budget: 'Rp 15 - 50 Juta', message: 'Halo Side Brothers, kami mau ajak kolaborasi shirt capsule collection.', date: 'Today, 10:30', isRead: false }
-        ];
+        const initialInquiries = [];
 
         // STATE MANAGERS WITH LOCAL STORAGE
         let state = {
-            isAdminLoggedIn: JSON.parse(localStorage.getItem('sb_admin_session')) || false,
+            isAdminLoggedIn: false,
             members: JSON.parse(localStorage.getItem('sb_members')) || initialMembers,
             donation: JSON.parse(localStorage.getItem('sb_donation')) || initialDonation,
-            donors: JSON.parse(localStorage.getItem('sb_donors')) || initialDonors,
-            inquiries: JSON.parse(localStorage.getItem('sb_inquiries')) || initialInquiries,
+            donors: initialDonors,
+            inquiries: initialInquiries,
+            pendingDonations: [],
             general: JSON.parse(localStorage.getItem('sb_general')) || {
                 badge: 'Official Website SIDE BROTHERS',
                 subtitle: 'Grup konten kreator Indonesia yang berawal dari keisengan nongkrong di pinggir sofa Marapthon Season 2. Sekarang menghibur ratusan ribu penggemar dengan keseruan tanpa batas!'
@@ -908,16 +894,29 @@
         function saveState() {
             localStorage.setItem('sb_members', JSON.stringify(state.members));
             localStorage.setItem('sb_donation', JSON.stringify(state.donation));
-            localStorage.setItem('sb_donors', JSON.stringify(state.donors));
-            localStorage.setItem('sb_inquiries', JSON.stringify(state.inquiries));
             localStorage.setItem('sb_general', JSON.stringify(state.general));
-            localStorage.setItem('sb_admin_session', JSON.stringify(state.isAdminLoggedIn));
-            
+
             renderAll();
+            if (state.isAdminLoggedIn && window.firebaseBridge) {
+                window.firebaseBridge.saveMainData().catch(error => {
+                    console.error('Gagal menyimpan data utama ke Firestore:', error);
+                    showToast('Data gagal disimpan ke cloud. Periksa koneksi dan aturan Firestore.');
+                });
+            }
         }
 
         function formatRupiah(number) {
             return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, character => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            })[character]);
         }
 
         function showToast(message) {
@@ -946,29 +945,34 @@
             document.getElementById('admin-login-modal').classList.add('hidden');
         }
 
-        function handleAdminLogin(e) {
+        async function handleAdminLogin(e) {
             e.preventDefault();
-            const u = document.getElementById('login-username').value;
-            const p = document.getElementById('login-password').value;
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const errorMessage = document.getElementById('login-error-msg');
+            errorMessage.classList.add('hidden');
 
-            // Default Admin Credentials Verification
-            if (u === 'admin' && p === 'admin123') {
-                state.isAdminLoggedIn = true;
-                saveState();
+            try {
+                await window.firebaseBridge.login(email, password);
                 closeAdminLoginModal();
                 openAdminModal();
-                showToast('Login Admin Berhasil! Selamat Datang.');
-            } else {
-                document.getElementById('login-error-text').innerText = 'Username atau Password salah!';
-                document.getElementById('login-error-msg').classList.remove('hidden');
+                showToast('Login Admin Berhasil via Firebase Auth!');
+            } catch (error) {
+                console.error('Login admin gagal:', error);
+                document.getElementById('login-error-text').innerText = error.message || 'Email atau password salah.';
+                errorMessage.classList.remove('hidden');
             }
         }
 
-        function handleAdminLogout() {
-            state.isAdminLoggedIn = false;
-            saveState();
-            closeAdminModal();
-            showToast('Anda telah logout dari Admin Panel.');
+        async function handleAdminLogout() {
+            try {
+                await window.firebaseBridge.logout();
+                closeAdminModal();
+                showToast('Anda telah logout dari sesi admin.');
+            } catch (error) {
+                console.error('Logout admin gagal:', error);
+                showToast('Logout gagal. Silakan coba lagi.');
+            }
         }
 
         // RENDER FUNCTIONS
@@ -982,6 +986,8 @@
             renderAdminDonorsHistory();
             updateHeaderAdminBtn();
         }
+        window.renderAll = renderAll;
+        window.appState = state;
 
         function updateHeaderAdminBtn() {
             const btnText = document.getElementById('header-admin-btn-text');
@@ -1048,12 +1054,12 @@
                 donorsList.innerHTML = state.donors.slice(0, 5).map(d => `
                     <div class="flex items-center justify-between bg-brand-dark/60 p-2.5 rounded-xl border border-brand-border/40 text-xs">
                         <div class="truncate max-w-[180px]">
-                            <span class="font-bold text-white block truncate">${d.name}</span>
-                            <span class="text-[10px] text-gray-400 italic truncate block">${d.message || 'Tanpa pesan'}</span>
+                                <span class="font-bold text-white block truncate">${escapeHtml(d.name)}</span>
+                                <span class="text-[10px] text-gray-400 italic truncate block">${escapeHtml(d.message || 'Tanpa pesan')}</span>
                         </div>
                         <div class="text-right">
                             <span class="font-bold text-emerald-400">${formatRupiah(d.amount)}</span>
-                            <span class="text-[9px] text-gray-500 block">${d.date}</span>
+                                <span class="text-[9px] text-gray-500 block">${escapeHtml(d.date)}</span>
                         </div>
                     </div>
                 `).join('');
@@ -1111,22 +1117,22 @@
                 <div class="bg-brand-dark p-4 rounded-2xl border ${i.isRead ? 'border-brand-border' : 'border-brand-yellow/50 bg-brand-yellow/5'} space-y-2">
                     <div class="flex items-center justify-between">
                         <div>
-                            <span class="font-bold text-white text-xs">${i.name}</span>
-                            <span class="text-[10px] text-gray-400"> (${i.company})</span>
-                            <span class="text-[10px] text-brand-yellow font-bold ml-2">Budget: ${i.budget}</span>
+                            <span class="font-bold text-white text-xs">${escapeHtml(i.name)}</span>
+                            <span class="text-[10px] text-gray-400"> (${escapeHtml(i.company)})</span>
+                            <span class="text-[10px] text-brand-yellow font-bold ml-2">Budget: ${escapeHtml(i.budget)}</span>
                         </div>
                         <div class="flex items-center space-x-2">
-                            <span class="text-[10px] text-gray-500">${i.date}</span>
-                            <button onclick="promptDelete('inquiry', '${i.id}', 'Pesan dari ${i.name}')" class="p-1.5 rounded bg-brand-red/20 text-brand-red hover:bg-brand-red hover:text-white text-xs transition-colors">
+                            <span class="text-[10px] text-gray-500">${escapeHtml(i.date)}</span>
+                            <button onclick="promptDelete('inquiry', '${escapeHtml(i.id)}', 'Pesan bisnis')" class="p-1.5 rounded bg-brand-red/20 text-brand-red hover:bg-brand-red hover:text-white text-xs transition-colors">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
                     </div>
                     <div class="text-xs text-gray-300 bg-brand-card/80 p-2.5 rounded-xl border border-brand-border/40">
-                        ${i.message}
+                        ${escapeHtml(i.message)}
                     </div>
                     <div class="text-[10px] text-gray-400">
-                        Email: <a href="mailto:${i.email}" class="text-brand-yellow underline">${i.email}</a>
+                        Email: <a href="mailto:${escapeHtml(i.email)}" class="text-brand-yellow underline">${escapeHtml(i.email)}</a>
                     </div>
                 </div>
             `).join('');
@@ -1134,25 +1140,43 @@
 
         function renderAdminDonorsHistory() {
             const list = document.getElementById('admin-donors-history-list');
-            if (state.donors.length === 0) {
+            if (state.donors.length === 0 && state.pendingDonations.length === 0) {
                 list.innerHTML = `<p class="text-xs text-gray-500 py-4 text-center">Belum ada riwayat transaksi donasi.</p>`;
                 return;
             }
 
-            list.innerHTML = state.donors.map(d => `
+            const pendingMarkup = state.pendingDonations.map(d => `
+                <div class="bg-amber-950/40 p-3 rounded-2xl border border-amber-500/40 flex items-center justify-between text-xs">
+                    <div>
+                        <div class="font-bold text-white">${escapeHtml(d.name)} <span class="text-amber-300">(Menunggu verifikasi)</span></div>
+                        <div class="text-[10px] text-gray-300">${escapeHtml(d.message || 'Tanpa pesan')} • ${escapeHtml(d.date)} • ${escapeHtml(d.method)}</div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="font-bold text-amber-300">${formatRupiah(d.amount)}</span>
+                        <button onclick="reviewDonation('${escapeHtml(d.id)}', true)" class="p-1.5 rounded bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500 hover:text-white text-xs" aria-label="Setujui donasi">
+                            <i class="fa-solid fa-check"></i>
+                        </button>
+                        <button onclick="promptDelete('pending-donation', '${escapeHtml(d.id)}', 'Konfirmasi donasi dari ${escapeHtml(d.name)}')" class="p-1.5 rounded bg-brand-red/20 text-brand-red hover:bg-brand-red hover:text-white text-xs" aria-label="Tolak donasi">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            const approvedMarkup = state.donors.map(d => `
                 <div class="bg-brand-dark p-3 rounded-2xl border border-brand-border flex items-center justify-between text-xs">
                     <div>
-                        <div class="font-bold text-white">${d.name}</div>
-                        <div class="text-[10px] text-gray-400">${d.message || 'Tanpa pesan'} • ${d.date}</div>
+                        <div class="font-bold text-white">${escapeHtml(d.name)}</div>
+                        <div class="text-[10px] text-gray-400">${escapeHtml(d.message || 'Tanpa pesan')} • ${escapeHtml(d.date)}</div>
                     </div>
                     <div class="flex items-center space-x-3">
                         <span class="font-bold text-emerald-400">${formatRupiah(d.amount)}</span>
-                        <button onclick="promptDelete('donor', '${d.id}', 'Donasi Rp ${d.amount} dari ${d.name}')" class="p-1.5 rounded bg-brand-red/20 text-brand-red hover:bg-brand-red hover:text-white text-xs transition-colors">
+                        <button onclick="promptDelete('donor', '${escapeHtml(d.id)}', 'Donasi Rp ${d.amount} dari ${escapeHtml(d.name)}')" class="p-1.5 rounded bg-brand-red/20 text-brand-red hover:bg-brand-red hover:text-white text-xs transition-colors">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
                 </div>
             `).join('');
+            list.innerHTML = `${pendingMarkup}${approvedMarkup}`;
 
             document.getElementById('admin-hero-badge').value = state.general.badge;
             document.getElementById('admin-hero-subtitle').value = state.general.subtitle;
@@ -1199,20 +1223,23 @@
             currentPendingDonation = null;
         }
 
-        function confirmQRPayment() {
+        async function confirmQRPayment() {
             if (!currentPendingDonation) return;
 
-            state.donors.unshift(currentPendingDonation);
-            state.donation.collected += currentPendingDonation.amount;
-            saveState();
+            try {
+                await window.firebaseBridge.submitDonation(currentPendingDonation);
+            } catch (error) {
+                console.error('Gagal mengirim konfirmasi donasi:', error);
+                showToast('Konfirmasi gagal dikirim. Silakan coba lagi.');
+                return;
+            }
 
             document.getElementById('donation-form').reset();
-            
             closeQRModal();
-            showToast('Pembayaran QRIS Berhasil! Terima kasih atas dukungannya.');
+            showToast('Konfirmasi terkirim. Donasi akan tampil setelah diverifikasi admin.');
         }
 
-        function handleBusinessSubmit(e) {
+        async function handleBusinessSubmit(e) {
             e.preventDefault();
             const name = document.getElementById('biz-name').value;
             const email = document.getElementById('biz-email').value;
@@ -1221,7 +1248,6 @@
             const message = document.getElementById('biz-message').value;
 
             const newInquiry = {
-                id: 'b_' + Date.now(),
                 name,
                 email,
                 company,
@@ -1231,17 +1257,24 @@
                 isRead: false
             };
 
-            state.inquiries.unshift(newInquiry);
-            saveState();
-
-            document.getElementById('business-form').reset();
-            showToast('Proposal Bisnis berhasil dikirim ke Admin Panel Side Brothers!');
+            try {
+                await window.firebaseBridge.submitInquiry(newInquiry);
+                document.getElementById('business-form').reset();
+                showToast('Proposal bisnis berhasil dikirim ke Admin Side Brothers!');
+            } catch (error) {
+                console.error('Gagal mengirim proposal bisnis:', error);
+                showToast('Proposal gagal dikirim. Silakan coba lagi.');
+            }
         }
 
         function openAdminModal() {
             document.getElementById('admin-modal').classList.remove('hidden');
-            state.inquiries.forEach(i => i.isRead = true);
-            saveState();
+            if (state.isAdminLoggedIn && window.firebaseBridge) {
+                window.firebaseBridge.markInquiriesRead().catch(error => {
+                    console.error('Gagal memperbarui status pesan:', error);
+                    showToast('Status pesan gagal diperbarui.');
+                });
+            }
         }
 
         function closeAdminModal() {
@@ -1348,11 +1381,16 @@
             const msgEl = document.getElementById('delete-confirm-message');
             const actionBtn = document.getElementById('confirm-delete-action-btn');
 
-            msgEl.innerHTML = `Apakah Anda yakin ingin menghapus <strong>"${name}"</strong>? Data akan terhapus secara permanen dari website.`;
+            msgEl.textContent = `Apakah Anda yakin ingin menghapus "${name}"? Data akan terhapus secara permanen dari website.`;
 
-            actionBtn.onclick = function() {
-                executeDelete(type, id);
-                closeDeleteConfirmModal();
+            actionBtn.onclick = async function() {
+                try {
+                    await executeDelete(type, id);
+                    closeDeleteConfirmModal();
+                } catch (error) {
+                    console.error('Gagal menghapus data:', error);
+                    showToast('Data gagal dihapus. Periksa koneksi dan izin admin.');
+                }
             };
 
             overlay.classList.remove('hidden');
@@ -1362,28 +1400,286 @@
             document.getElementById('delete-confirm-overlay').classList.add('hidden');
         }
 
-        function executeDelete(type, id) {
+        async function reviewDonation(id, approve) {
+            try {
+                if (approve) {
+                    await window.firebaseBridge.approveDonation(id);
+                    showToast('Donasi disetujui dan total terkumpul diperbarui.');
+                }
+            } catch (error) {
+                console.error('Gagal memverifikasi donasi:', error);
+                showToast('Verifikasi donasi gagal. Periksa koneksi dan izin admin.');
+            }
+        }
+
+        async function executeDelete(type, id) {
             if (type === 'member') {
                 state.members = state.members.filter(m => m.id !== id);
                 showToast('Member telah dihapus.');
+                saveState();
             } else if (type === 'inquiry') {
-                state.inquiries = state.inquiries.filter(i => i.id !== id);
+                await window.firebaseBridge.deleteInquiry(id);
                 showToast('Pesan bisnis telah dihapus.');
             } else if (type === 'donor') {
                 const donor = state.donors.find(d => d.id === id);
-                if (donor) {
-                    state.donation.collected = Math.max(0, state.donation.collected - donor.amount);
-                }
-                state.donors = state.donors.filter(d => d.id !== id);
+                if (donor) await window.firebaseBridge.deleteDonor(id, donor.amount);
                 showToast('Riwayat donasi dihapus.');
+            } else if (type === 'pending-donation') {
+                await window.firebaseBridge.rejectDonation(id);
+                showToast('Konfirmasi donasi ditolak.');
             }
 
-            saveState();
+            renderAll();
         }
 
         window.onload = function() {
             renderAll();
         };
+    </script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAnalytics, isSupported } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+        import {
+            getFirestore, doc, getDoc, setDoc, collection, getDocs, addDoc,
+            deleteDoc, updateDoc, query, where, serverTimestamp, runTransaction,
+            writeBatch
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import {
+            getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBeU4kLomGIBOGwwpDjb7nOs2KQGE38BY8",
+            authDomain: "sidebrothers-c609a.firebaseapp.com",
+            projectId: "sidebrothers-c609a",
+            storageBucket: "sidebrothers-c609a.firebasestorage.app",
+            messagingSenderId: "103947499060",
+            appId: "1:103947499060:web:01011d981b406c6bc93c61",
+            measurementId: "G-8P8EPMN360"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        const mainDataRef = doc(db, 'sidebrothers', 'main_data');
+        let adminUser = null;
+
+        async function verifyAdmin(user) {
+            try {
+                const adminProfile = await getDoc(doc(db, 'admins', user.uid));
+                if (!adminProfile.exists() || adminProfile.data().role !== 'admin') {
+                    throw new Error('Akun ini belum terdaftar sebagai admin Firebase.');
+                }
+                adminUser = user;
+            } catch (error) {
+                adminUser = null;
+                await signOut(auth);
+                throw error;
+            }
+        }
+
+        async function loadCloudData() {
+            const mainSnapshot = await getDoc(mainDataRef);
+            if (mainSnapshot.exists()) {
+                const data = mainSnapshot.data();
+                if (Array.isArray(data.members)) window.appState.members = data.members;
+                if (data.donation && typeof data.donation === 'object') window.appState.donation = data.donation;
+                if (data.general && typeof data.general === 'object') window.appState.general = data.general;
+                const allowedFields = ['members', 'donation', 'general'];
+                const hasLegacyFields = Object.keys(data).some(field => !allowedFields.includes(field));
+                if (adminUser && hasLegacyFields) {
+                    await setDoc(mainDataRef, {
+                        members: window.appState.members,
+                        donation: window.appState.donation,
+                        general: window.appState.general
+                    });
+                }
+            } else if (adminUser) {
+                await setDoc(mainDataRef, {
+                    members: window.appState.members,
+                    donation: window.appState.donation,
+                    general: window.appState.general
+                });
+            }
+
+            const approvedDonors = await getDocs(query(collection(db, 'donors'), where('status', '==', 'approved')));
+            window.appState.donors = approvedDonors.docs.map(snapshot => ({
+                id: snapshot.id,
+                ...snapshot.data()
+            }));
+
+            if (adminUser) {
+                const [inquiries, pendingDonations] = await Promise.all([
+                    getDocs(collection(db, 'inquiries')),
+                    getDocs(collection(db, 'donationRequests'))
+                ]);
+                window.appState.inquiries = inquiries.docs.map(snapshot => ({
+                    id: snapshot.id,
+                    ...snapshot.data()
+                }));
+                window.appState.pendingDonations = pendingDonations.docs.map(snapshot => ({
+                    id: snapshot.id,
+                    ...snapshot.data()
+                }));
+            } else {
+                window.appState.inquiries = [];
+                window.appState.pendingDonations = [];
+            }
+            window.renderAll();
+        }
+
+        window.firebaseBridge = {
+            async login(email, password) {
+                const credential = await signInWithEmailAndPassword(auth, email, password);
+                await verifyAdmin(credential.user);
+                try {
+                    await loadCloudData();
+                } catch (error) {
+                    adminUser = null;
+                    await signOut(auth);
+                    throw error;
+                }
+            },
+            async logout() {
+                await signOut(auth);
+                adminUser = null;
+                window.appState.isAdminLoggedIn = false;
+                await loadCloudData();
+            },
+            async saveMainData() {
+                if (!adminUser) throw new Error('Sesi admin tidak aktif.');
+                await setDoc(mainDataRef, {
+                    members: window.appState.members,
+                    donation: window.appState.donation,
+                    general: window.appState.general
+                });
+            },
+            async submitInquiry(inquiry) {
+                await addDoc(collection(db, 'inquiries'), {
+                    ...inquiry,
+                    createdAt: serverTimestamp()
+                });
+                if (adminUser) await loadCloudData();
+            },
+            async submitDonation(donation) {
+                await addDoc(collection(db, 'donationRequests'), {
+                    name: donation.name,
+                    amount: donation.amount,
+                    message: donation.message || '',
+                    method: donation.method,
+                    date: donation.date,
+                    status: 'pending',
+                    createdAt: serverTimestamp()
+                });
+                if (adminUser) await loadCloudData();
+            },
+            async markInquiriesRead() {
+                if (!adminUser) throw new Error('Sesi admin tidak aktif.');
+                const unread = await getDocs(query(collection(db, 'inquiries'), where('isRead', '==', false)));
+                if (unread.empty) return;
+                const batch = writeBatch(db);
+                unread.docs.forEach(snapshot => batch.update(snapshot.ref, { isRead: true }));
+                await batch.commit();
+                await loadCloudData();
+            },
+            async deleteInquiry(id) {
+                if (!adminUser) throw new Error('Sesi admin tidak aktif.');
+                await deleteDoc(doc(db, 'inquiries', id));
+                await loadCloudData();
+            },
+            async deleteDonor(id) {
+                if (!adminUser) throw new Error('Sesi admin tidak aktif.');
+                await runTransaction(db, async transaction => {
+                    const donorRef = doc(db, 'donors', id);
+                    const [donorSnapshot, mainSnapshot] = await Promise.all([
+                        transaction.get(donorRef),
+                        transaction.get(mainDataRef)
+                    ]);
+                    if (!donorSnapshot.exists() || !mainSnapshot.exists()) {
+                        throw new Error('Data donasi tidak ditemukan.');
+                    }
+                    const donation = mainSnapshot.data().donation;
+                    transaction.update(mainDataRef, {
+                        'donation.collected': Math.max(0, donation.collected - donorSnapshot.data().amount)
+                    });
+                    transaction.delete(donorRef);
+                });
+                await loadCloudData();
+            },
+            async approveDonation(id) {
+                if (!adminUser) throw new Error('Sesi admin tidak aktif.');
+                const requestRef = doc(db, 'donationRequests', id);
+                const donorRef = doc(collection(db, 'donors'));
+                await runTransaction(db, async transaction => {
+                    const [requestSnapshot, mainSnapshot] = await Promise.all([
+                        transaction.get(requestRef),
+                        transaction.get(mainDataRef)
+                    ]);
+                    if (!requestSnapshot.exists() || !mainSnapshot.exists()) {
+                        throw new Error('Konfirmasi donasi atau data utama tidak ditemukan.');
+                    }
+                    const request = requestSnapshot.data();
+                    if (request.status !== 'pending') throw new Error('Konfirmasi ini sudah diproses.');
+                    const donation = mainSnapshot.data().donation;
+                    transaction.update(mainDataRef, {
+                        'donation.collected': donation.collected + request.amount
+                    });
+                    transaction.set(donorRef, {
+                        name: request.name,
+                        amount: request.amount,
+                        message: request.message,
+                        method: request.method,
+                        date: request.date,
+                        status: 'approved',
+                        createdAt: request.createdAt
+                    });
+                    transaction.delete(requestRef);
+                });
+                await loadCloudData();
+            },
+            async rejectDonation(id) {
+                if (!adminUser) throw new Error('Sesi admin tidak aktif.');
+                await deleteDoc(doc(db, 'donationRequests', id));
+                await loadCloudData();
+            }
+        };
+
+        onAuthStateChanged(auth, async user => {
+            if (user) {
+                try {
+                    await verifyAdmin(user);
+                    window.appState.isAdminLoggedIn = true;
+                } catch (error) {
+                    window.appState.isAdminLoggedIn = false;
+                    console.error('Sesi Firebase bukan admin:', error);
+                    window.renderAll();
+                    return;
+                }
+                try {
+                    await loadCloudData();
+                } catch (error) {
+                    console.error('Gagal memuat data admin dari Firestore:', error);
+                    document.getElementById('toast-text').innerText = 'Data Firebase gagal dimuat. Periksa koneksi dan aturan Firestore.';
+                    document.getElementById('toast-msg').classList.remove('hidden');
+                }
+                window.renderAll();
+            } else {
+                adminUser = null;
+                window.appState.isAdminLoggedIn = false;
+                try {
+                    await loadCloudData();
+                } catch (error) {
+                    console.error('Gagal memuat data Firebase:', error);
+                    document.getElementById('toast-text').innerText = 'Data Firebase gagal dimuat. Periksa koneksi dan aturan Firestore.';
+                    document.getElementById('toast-msg').classList.remove('hidden');
+                }
+                window.renderAll();
+            }
+        });
+
+        isSupported().then(supported => {
+            if (supported) getAnalytics(app);
+        }).catch(error => console.error('Firebase Analytics tidak dapat dijalankan:', error));
     </script>
 </body>
 </html>
