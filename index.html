@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Side Brothers (SideBrother) - Official Website & Admin Control</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            yellow: '#FFE600',
+                            red: '#FF3333',
+                            dark: '#0D0E12',
+                            card: '#16181E',
+                            border: '#282B35',
+                            accent: '#22C55E'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- QRCode JS Library for generating dynamic QR codes -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #0D0E12;
+            color: #F3F4F6;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(22, 24, 30, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .glass-card:hover {
+            border-color: rgba(255, 230, 0, 0.3);
+        }
+        .text-gradient {
+            background: linear-gradient(135deg, #FFE600 0%, #FF3333 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .qr-modal-shell {
+            background: linear-gradient(180deg, rgba(18,20,24,0.98) 0%, rgba(11,12,15,0.98) 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+        }
+        .qr-code-panel {
+            background: linear-gradient(180deg, #f7f7f8 0%, #ebedf0 100%);
+            box-shadow: inset 0 0 0 1px rgba(16, 24, 40, 0.08);
+        }
+        .member-photo {
+            object-position: center 20%;
+            transform-origin: center center;
+        }
+        .brand-logo-badge {
+            width: 66px;
+            height: 66px;
+            flex: 0 0 66px;
+            border-radius: 18px;
+            background: #fff;
+            border: 3px solid #ffe600;
+            box-shadow: 0 0 0 1px rgba(255, 230, 0, 0.16), 0 8px 24px rgba(255, 230, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .brand-logo-badge img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .site-header {
+            background: linear-gradient(105deg, rgba(13,14,18,0.97), rgba(22,24,30,0.95) 55%, rgba(18,19,24,0.97));
+            border-bottom: 1px solid rgba(255, 230, 0, 0.22);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.28);
+        }
+        .primary-nav a {
+            display: inline-flex;
+            align-items: center;
+            min-height: 38px;
+            padding: 0.55rem 0.7rem;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            white-space: nowrap;
+        }
+        .primary-nav a:hover,
+        .primary-nav a:focus-visible {
+            background: rgba(255, 230, 0, 0.08);
+            border-color: rgba(255, 230, 0, 0.18);
+            outline: none;
+        }
+        @media (max-width: 1023px) {
+            .brand-name {
+                font-size: 1rem;
+            }
+            .header-donate {
+                width: 78px;
+                padding-inline: 0.5rem;
+                text-align: center;
+                line-height: 1.2;
+            }
+            .brand-logo-badge {
+                width: 58px;
+                height: 58px;
+                flex-basis: 58px;
+                border-radius: 16px;
+            }
+            .primary-nav a {
+                padding-inline: 0.45rem;
+                font-size: 0.72rem;
+            }
+        }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0D0E12;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #282B35;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FFE600;
+        }
+    </style>
+</head>
+<body class="bg-brand-dark text-gray-100 min-h-screen flex flex-col justify-between selection:bg-brand-yellow selection:text-black">
+
+    <header class="site-header sticky top-0 z-40 w-full backdrop-blur-xl">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-20 py-2 flex items-center justify-between gap-3">
+            <div class="flex items-center space-x-3 cursor-pointer shrink-0" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+                <div class="brand-logo-badge">
+                    <img src="side-brothers-logo.jpg" alt="Side Brothers logo" />
+                </div>
+                <div>
+                    <span class="brand-name block font-extrabold text-lg sm:text-xl leading-tight tracking-[0.08em] text-white">SIDE <span class="text-brand-yellow">BROTHERS</span></span>
+                    <span class="block text-[9px] sm:text-[10px] text-gray-400 mt-1 tracking-[0.16em] uppercase">Kru Pinggiran Sofa</span>
+                </div>
+            </div>
+
+            <!-- Desktop Nav Links -->
+            <nav class="primary-nav hidden md:flex items-center space-x-1 lg:space-x-2 text-xs lg:text-sm font-semibold text-gray-300">
+                <a href="#about" class="hover:text-brand-yellow transition-colors">Asal-Usul</a>
+                <a href="#members" class="hover:text-brand-yellow transition-colors">Anggota</a>
+                <a href="#donation" class="hover:text-brand-yellow transition-colors">Dukungan & Donasi</a>
+                <a href="#business" class="hover:text-brand-yellow transition-colors">Kerja Sama Bisnis</a>
+            </nav>
+
+            <div class="flex items-center space-x-2 sm:space-x-3 shrink-0">
+                <button onclick="handleAdminAccess()" class="px-3 py-2.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-xs font-semibold text-gray-300 hover:text-white transition-all flex items-center space-x-2 border border-white/10 hover:border-brand-yellow/30">
+                    <i class="fa-solid fa-user-gear text-brand-yellow"></i>
+                    <span class="hidden lg:inline" id="header-admin-btn-text">Admin Panel</span>
+                </button>
+                <a href="#donation" class="header-donate px-3.5 sm:px-4 py-2.5 rounded-xl bg-brand-yellow hover:bg-amber-300 text-black font-extrabold text-xs transition-all hover:-translate-y-0.5 shadow-lg shadow-brand-yellow/15">
+                    Dukung Kami
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        <section class="relative py-20 lg:py-28 overflow-hidden">
+            <div class="absolute -top-40 -right-40 w-96 h-96 bg-brand-yellow/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="absolute top-1/2 -left-40 w-96 h-96 bg-brand-red/10 rounded-full blur-3xl pointer-events-none"></div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+                <div class="text-center max-w-3xl mx-auto">
+                    <div class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-brand-yellow/10 border border-brand-yellow/30 text-brand-yellow text-xs font-bold mb-6">
+                        <i class="fa-solid fa-couch"></i>
+                        <span id="hero-badge">Official Website Kru Pinggiran Sofa</span>
+                    </div>
+                    <h1 class="text-4xl sm:text-6xl font-black tracking-tight mb-6 leading-tight" id="hero-title">
+                        Dari Pinggiran Sofa Ke <span class="text-gradient">Layar Utama</span>
+                    </h1>
+                    <p class="text-gray-400 text-base sm:text-lg mb-8 leading-relaxed" id="hero-subtitle">
+                        Grup konten kreator Indonesia yang berawal dari keisengan nongkrong di pinggir sofa Marapthon Season 2. Sekarang menghibur ratusan ribu penggemar dengan keseruan tanpa batas!
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <a href="#members" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-brand-yellow text-black font-bold hover:bg-yellow-400 transition-all shadow-lg shadow-brand-yellow/20 flex items-center justify-center space-x-2">
+                            <span>Lihat Anggota</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </a>
+                        <a href="#donation" class="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-brand-card hover:bg-brand-border text-white font-semibold border border-white/10 transition-all flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-hand-holding-dollar text-brand-yellow"></i>
+                            <span>Kirim Donasi</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Official Social Media Counter Bar -->
+                <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto text-center">
+                    <a href="https://www.instagram.com/thesidebrothers/" target="_blank" class="p-4 rounded-2xl glass-card hover:scale-105 transition-all group">
+                        <i class="fa-brands fa-instagram text-2xl text-pink-500 mb-2 group-hover:scale-110 transition-transform"></i>
+                        <div class="text-xs text-gray-400">Instagram</div>
+                        <div class="font-bold text-sm text-white">@sidebrothers.id</div>
+                    </a>
+                    <a href="https://www.youtube.com/@sidebrothers.official" target="_blank" class="p-4 rounded-2xl glass-card hover:scale-105 transition-all group">
+                        <i class="fa-brands fa-youtube text-2xl text-red-500 mb-2 group-hover:scale-110 transition-transform"></i>
+                        <div class="text-xs text-gray-400">YouTube Channel</div>
+                        <div class="font-bold text-sm text-white">Side Brothers Official</div>
+                    </a>
+                    <a href="https://www.tiktok.com/@sidebrother.official?lang=id-ID" target="_blank" class="p-4 rounded-2xl glass-card hover:scale-105 transition-all group">
+                        <i class="fa-brands fa-tiktok text-2xl text-cyan-400 mb-2 group-hover:scale-110 transition-transform"></i>
+                        <div class="text-xs text-gray-400">TikTok</div>
+                        <div class="font-bold text-sm text-white">@sidebrothers.official</div>
+                    </a>
+                    <a href="https://discord.gg/sidebrothers" target="_blank" class="p-4 rounded-2xl glass-card hover:scale-105 transition-all group">
+                        <i class="fa-brands fa-discord text-2xl text-indigo-400 mb-2 group-hover:scale-110 transition-transform"></i>
+                        <div class="text-xs text-gray-400">Community</div>
+                        <div class="font-bold text-sm text-white">SideBrother Discord</div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="py-16 bg-brand-card/50 border-y border-brand-border/40 relative">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                    <div class="lg:col-span-5 space-y-6">
+                        <div class="inline-block px-3 py-1 rounded-lg bg-brand-red/10 text-brand-red text-xs font-bold uppercase tracking-wider">
+                            Origin Story
+                        </div>
+                        <h2 class="text-3xl sm:text-4xl font-extrabold text-white leading-tight">
+                            Berawal Dari <span class="text-brand-yellow">Pinggir Sofa</span> Marapthon
+                        </h2>
+                        <div id="story-content" class="text-gray-300 space-y-4 text-sm sm:text-base leading-relaxed">
+                            <p>
+                                Side Brothers (atau SideBrother) adalah grup konten kreator asal Indonesia yang berawal dari perkumpulan para kru/talent pinggiran yang sering duduk di pinggir sofa pada saat acara <strong>Marapthon Season 2</strong> di kanal YouTube <strong>Reza Arap</strong>.
+                            </p>
+                            <p>
+                                Terbentuk secara spontan saat transisi dari Marapthon Season 2 menuju Season 3 karena para anggotanya memiliki jadwal kosong dan sering nongkrong bersama. Dari chemistry alami dan humor tanpa garansi, lahirlah grup komedi & entertainment yang kini amat dicintai!
+                            </p>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-7">
+                        <div class="relative rounded-3xl overflow-hidden glass-card p-6 border border-white/10 shadow-2xl">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-brand-dark/80 p-5 rounded-2xl border border-brand-border">
+                                    <div class="w-10 h-10 rounded-xl bg-brand-yellow/20 flex items-center justify-center text-brand-yellow mb-3 font-bold">
+                                        <i class="fa-solid fa-tv"></i>
+                                    </div>
+                                    <h3 class="font-bold text-white text-base mb-1">Marapthon S2</h3>
+                                    <p class="text-xs text-gray-400">Titik mula berkumpulnya para talenta di pinggir sofa Reza Arap.</p>
+                                </div>
+                                <div class="bg-brand-dark/80 p-5 rounded-2xl border border-brand-border">
+                                    <div class="w-10 h-10 rounded-xl bg-brand-red/20 flex items-center justify-center text-brand-red mb-3 font-bold">
+                                        <i class="fa-solid fa-bolt"></i>
+                                    </div>
+                                    <h3 class="font-bold text-white text-base mb-1">Spontan & Alami</h3>
+                                    <p class="text-xs text-gray-400">Terbentuk tanpa rencana rumit, berkat chemistry nongkrong bareng.</p>
+                                </div>
+                                <div class="bg-brand-dark/80 p-5 rounded-2xl border border-brand-border">
+                                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 mb-3 font-bold">
+                                        <i class="fa-solid fa-users"></i>
+                                    </div>
+                                    <h3 class="font-bold text-white text-base mb-1">4 Pilar Utama</h3>
+                                    <p class="text-xs text-gray-400">Tepe, Niko Junius, Yuka Theo, dan Tierison mengisi kekonyolan harian.</p>
+                                </div>
+                                <div class="bg-brand-dark/80 p-5 rounded-2xl border border-brand-border">
+                                    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 mb-3 font-bold">
+                                        <i class="fa-solid fa-shirt"></i>
+                                    </div>
+                                    <h3 class="font-bold text-white text-base mb-1">Brand & Apparel</h3>
+                                    <p class="text-xs text-gray-400">Setiap member memiliki lini streetwear dan official merchandise Shopee.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="members" class="py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-2xl mx-auto mb-16">
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white mb-3">
+                        Anggota <span class="text-brand-yellow">Side Brothers</span>
+                    </h2>
+                    <p class="text-gray-400 text-sm sm:text-base">
+                        Kenali lebih dekat talenta di balik kehebohan Side Brothers lengkap dengan akun media sosial dan official store brand baju mereka.
+                    </p>
+                </div>
+
+                <!-- Dynamic Member Container -->
+                <div id="members-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Rendered via JS -->
+                </div>
+            </div>
+        </section>
+
+        <section id="donation" class="py-20 bg-brand-card/40 border-t border-brand-border/40 relative">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
+                    
+                    <!-- Progress & Description -->
+                    <div class="lg:col-span-5 space-y-6">
+                        <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold">
+                            <i class="fa-solid fa-heart"></i>
+                            <span>Dukungan Komunitas</span>
+                        </div>
+                        <h2 class="text-3xl font-extrabold text-white">
+                            Dukung Operasional <span class="text-brand-yellow">Side Brothers</span>
+                        </h2>
+                        <p id="donation-desc" class="text-gray-300 text-sm leading-relaxed">
+                            Bantu kami untuk terus memproduksi konten hiburan berkualitas tinggi, perlengkapan live stream baru, dan event kumpul bareng SideBrothers Fans!
+                        </p>
+
+                        <!-- Progress Bar Container -->
+                        <div class="glass-card p-6 rounded-2xl space-y-4">
+                            <div class="flex justify-between items-end">
+                                <div>
+                                    <span class="text-xs text-gray-400 block">Terkumpul</span>
+                                    <span id="collected-amount" class="text-2xl font-black text-brand-yellow">Rp 0</span>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs text-gray-400 block">Target Campaign</span>
+                                    <span id="target-amount" class="text-sm font-semibold text-gray-300">Rp 10.000.000</span>
+                                </div>
+                            </div>
+                            <div class="w-full bg-brand-dark rounded-full h-3 overflow-hidden p-0.5 border border-brand-border">
+                                <div id="donation-progress-bar" class="bg-gradient-to-r from-brand-yellow to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-400">
+                                <span>Progress: <strong id="progress-percent" class="text-white">0%</strong></span>
+                                <span id="donor-count-text">0 Pendonor</span>
+                            </div>
+                        </div>
+
+                        <!-- Recent Supporters Leaderboard Widget -->
+                        <div class="glass-card p-5 rounded-2xl space-y-3">
+                            <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center justify-between">
+                                <span>Pendonor Terbaru</span>
+                                <i class="fa-solid fa-list-ul text-brand-yellow"></i>
+                            </h3>
+                            <div id="recent-donors-list" class="space-y-2.5 max-h-48 overflow-y-auto pr-1">
+                                <!-- Rendered via JS -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Donasi Interaktif -->
+                    <div class="lg:col-span-7">
+                        <div class="glass-card p-6 sm:p-8 rounded-3xl border border-white/10 shadow-xl">
+                            <h3 class="text-xl font-bold text-white mb-2">Kirim Apresiasi & Pesan Stream</h3>
+                            <p class="text-xs text-gray-400 mb-6">Pilih preset nominal atau isi sendiri jumlah dukungan kamu.</p>
+
+                            <form id="donation-form" onsubmit="handleDonationSubmit(event)" class="space-y-5">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-300 mb-2">Pilih Nominal Donasi (Rupiah)</label>
+                                    <div class="grid grid-cols-3 gap-2.5" id="preset-buttons">
+                                        <button type="button" onclick="selectPreset(10000)" class="preset-btn py-2.5 rounded-xl border border-brand-border bg-brand-dark text-xs font-bold text-gray-300 hover:border-brand-yellow hover:text-white transition-all">Rp 10.000</button>
+                                        <button type="button" onclick="selectPreset(25000)" class="preset-btn py-2.5 rounded-xl border border-brand-border bg-brand-dark text-xs font-bold text-gray-300 hover:border-brand-yellow hover:text-white transition-all">Rp 25.000</button>
+                                        <button type="button" onclick="selectPreset(50000)" class="preset-btn py-2.5 rounded-xl border border-brand-border bg-brand-dark text-xs font-bold text-gray-300 hover:border-brand-yellow hover:text-white transition-all">Rp 50.000</button>
+                                        <button type="button" onclick="selectPreset(100000)" class="preset-btn py-2.5 rounded-xl border border-brand-border bg-brand-dark text-xs font-bold text-gray-300 hover:border-brand-yellow hover:text-white transition-all">Rp 100.000</button>
+                                        <button type="button" onclick="selectPreset(250000)" class="preset-btn py-2.5 rounded-xl border border-brand-border bg-brand-dark text-xs font-bold text-gray-300 hover:border-brand-yellow hover:text-white transition-all">Rp 250.000</button>
+                                        <button type="button" onclick="selectPreset(500000)" class="preset-btn py-2.5 rounded-xl border border-brand-border bg-brand-dark text-xs font-bold text-gray-300 hover:border-brand-yellow hover:text-white transition-all">Rp 500.000</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-300 mb-1.5">Nominal Lainnya (Rp)</label>
+                                    <input type="number" id="custom-amount" min="5000" placeholder="Masukkan jumlah nominal..." required class="w-full px-4 py-3 rounded-xl bg-brand-dark/90 border border-brand-border text-white text-sm focus:outline-none focus:border-brand-yellow transition-all">
+                                </div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Nama Pendonor / Nickname</label>
+                                        <input type="text" id="donor-name" placeholder="Misal: Bro Fanbase" required class="w-full px-4 py-2.5 rounded-xl bg-brand-dark/90 border border-brand-border text-white text-sm focus:outline-none focus:border-brand-yellow transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Metode Pembayaran</label>
+                                        <select id="payment-method" class="w-full px-4 py-2.5 rounded-xl bg-brand-dark/90 border border-brand-border text-white text-sm focus:outline-none focus:border-brand-yellow transition-all">
+                                            <option value="QRIS Instant">QRIS (All E-Wallet / Bank)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-300 mb-1.5">Pesan Dukungan / TTS Stream</label>
+                                    <textarea id="donor-message" rows="3" placeholder="Tuliskan pesan gokil kamu untuk member Side Brothers..." class="w-full px-4 py-2.5 rounded-xl bg-brand-dark/90 border border-brand-border text-white text-sm focus:outline-none focus:border-brand-yellow transition-all"></textarea>
+                                </div>
+
+                                <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-brand-yellow to-amber-500 hover:from-amber-400 hover:to-brand-yellow text-black font-extrabold text-sm shadow-lg shadow-brand-yellow/20 transition-all flex items-center justify-center space-x-2">
+                                    <i class="fa-solid fa-qrcode"></i>
+                                    <span>Kirim Dukungan Sekarang</span>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <section id="business" class="py-20 relative">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-12">
+                    <span class="inline-block px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-bold mb-3 uppercase tracking-wider">Business & Collaboration</span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Kerja Sama <span class="text-brand-yellow">Bisnis</span></h2>
+                    <p class="text-gray-400 text-sm mt-2">Tertarik untuk endorsement, sponsorship, atau kolaborasi dengan Side Brothers? Kirimkan proposal Anda di bawah ini.</p>
+                </div>
+
+                <div class="glass-card p-6 sm:p-10 rounded-3xl border border-white/10 relative">
+                    <form id="business-form" onsubmit="handleBusinessSubmit(event)" class="space-y-5">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Nama Lengkap / Kontak</label>
+                                <input type="text" id="biz-name" placeholder="Nama Anda" required class="w-full px-4 py-3 rounded-xl bg-brand-dark/90 border border-brand-border text-white text-sm focus:outline-none focus:border-brand-yellow transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Email Perusahaan / Bisnis</label>
+                                <input type="email" id="biz-email" placeholder="email@perusahaan.com" required class="w-full px-4 py-3 rounded-xl bg-brand-dark/90 border border-brand-border text-white text-sm focus:outline-none focus:border-brand-yellow transition-all">
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Nama Brand / Perusahaan</label>
+                                <input type="text" id="biz-company" placeholder="PT / Brand Name" required class="w-full px-4 py-3 rounded-xl bg-brand-dark/90 border border-brand-border text-white text-sm focus:outline-none focus:border-brand-yellow transition-all">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Estimasi Budget</label>
+                                <select id="biz-budget" class="w-full px-4 py-3 rounded-xl bg-brand-dark/90 border border-brand-border text-white text-sm focus:outline-none focus:border-brand-yellow transition-all">
+                                    <option value="< Rp 5 Juta">&lt; Rp 5 Juta</option>
+                                    <option value="Rp 5 - 15 Juta">Rp 5 - 15 Juta</option>
+                                    <option value="Rp 15 - 50 Juta">Rp 15 - 50 Juta</option>
+                                    <option value="> Rp 50 Juta">&gt; Rp 50 Juta</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1.5">Detail Pesan / Kerjasama</label>
+                            <textarea id="biz-message" rows="4" placeholder="Jelaskan detail campaign, produk, atau kolaborasi yang diinginkan..." required class="w-full px-4 py-3 rounded-xl bg-brand-dark/90 border border-brand-border text-white text-sm focus:outline-none focus:border-brand-yellow transition-all"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-4 rounded-xl bg-brand-yellow hover:bg-yellow-400 text-black font-extrabold text-sm transition-all shadow-lg shadow-brand-yellow/20 flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-briefcase"></i>
+                            <span>Kirim Penawaran Bisnis</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-brand-card border-t border-brand-border/60 py-12 text-xs text-gray-400">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                <div class="flex items-center space-x-3">
+                    <div class="brand-logo-badge">
+                        <img src="side-brothers-logo.jpg" alt="Side Brothers logo" />
+                    </div>
+                    <span class="text-sm font-bold text-white tracking-wider">SIDE BROTHERS</span>
+                </div>
+
+                <div class="flex space-x-6">
+                    <a href="https://instagram.com" target="_blank" class="hover:text-brand-yellow transition-colors"><i class="fa-brands fa-instagram text-base"></i></a>
+                    <a href="https://youtube.com" target="_blank" class="hover:text-brand-yellow transition-colors"><i class="fa-brands fa-youtube text-base"></i></a>
+                    <a href="https://tiktok.com" target="_blank" class="hover:text-brand-yellow transition-colors"><i class="fa-brands fa-tiktok text-base"></i></a>
+                    <a href="https://discord.com" target="_blank" class="hover:text-brand-yellow transition-colors"><i class="fa-brands fa-discord text-base"></i></a>
+                </div>
+
+                <div class="text-center md:text-right flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-4">
+                    <span>&copy; <script>document.write(new Date().getFullYear())</script> Side Brothers. All rights reserved.</span>
+                    <button onclick="handleAdminAccess()" class="text-gray-400 hover:text-brand-yellow underline transition-colors">
+                        Panel Admin
+                    </button>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- FLOATING ADMIN ACTION BUTTON -->
+    <button onclick="handleAdminAccess()" class="fixed bottom-6 right-6 z-40 px-4 py-3 rounded-full bg-brand-yellow text-black font-extrabold text-xs shadow-2xl hover:bg-yellow-400 hover:scale-110 transition-all flex items-center space-x-2 border-2 border-black">
+        <i class="fa-solid fa-lock text-sm"></i>
+        <span>Admin Panel</span>
+    </button>
+
+    <div id="qr-modal" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="qr-modal-shell w-full max-w-[430px] rounded-[30px] overflow-hidden p-5 text-center animate-in fade-in zoom-in-95 duration-200">
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-sm font-bold border border-emerald-400/30">
+                        <i class="fa-solid fa-qrcode"></i>
+                    </div>
+                    <div class="text-left">
+                        <div class="text-[10px] uppercase tracking-[0.22em] text-emerald-300/80 font-bold">QRIS</div>
+                        <span class="font-bold text-white text-sm">Pembayaran Donasi</span>
+                    </div>
+                </div>
+                <button onclick="closeQRModal()" class="w-8 h-8 rounded-full bg-white/5 text-gray-300 hover:text-white border border-white/10 hover:bg-white/10 transition-colors flex items-center justify-center text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="rounded-2xl border border-white/10 bg-[#111418] p-3.5 text-left space-y-2 mb-4">
+                <div class="flex justify-between items-center text-[11px]">
+                    <span class="text-gray-400">Pendonor</span>
+                    <span id="qr-modal-donor" class="font-bold text-white"></span>
+                </div>
+                <div class="flex justify-between items-center text-[11px]">
+                    <span class="text-gray-400">Nominal</span>
+                    <span id="qr-modal-amount" class="font-extrabold text-brand-yellow text-sm"></span>
+                </div>
+                <div class="flex justify-between items-center text-[11px]">
+                    <span class="text-gray-400">Metode</span>
+                    <span id="qr-modal-method" class="font-semibold text-emerald-400"></span>
+                </div>
+            </div>
+
+            <div class="qr-code-panel p-4 rounded-[26px] border border-black/10 inline-block w-full max-w-[290px] mx-auto shadow-[0_16px_30px_rgba(15,23,42,0.12)]">
+                <div id="qrcode-container" class="flex justify-center items-center min-w-[180px] min-h-[180px] rounded-2xl overflow-hidden bg-white p-2">
+                    <img src="qris-sidebrothers.png" alt="QRIS Side Brothers" class="w-[170px] h-[170px] object-contain rounded-md">
+                </div>
+                <div class="text-[9px] font-black text-black tracking-[0.35em] mt-3 uppercase flex items-center justify-center space-x-1.5">
+                    <span>QRIS</span>
+                    <span class="text-gray-500">•</span>
+                    <span>Side Brothers</span>
+                </div>
+            </div>
+
+            <p class="text-[11px] text-gray-300 mt-4 leading-relaxed">
+                Scan menggunakan <strong class="text-white">GoPay</strong>, <strong class="text-white">OVO</strong>, <strong class="text-white">ShopeePay</strong>, <strong class="text-white">Dana</strong>, <strong class="text-white">LinkAja</strong> atau <strong class="text-white">M-Banking</strong> pilihanmu.
+            </p>
+
+            <div class="mt-4 text-[11px] text-amber-200 bg-amber-500/10 p-2.5 rounded-xl border border-amber-400/25 flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-clock text-xs"></i>
+                <span>Selesaikan pembayaran dalam <strong id="qr-timer" class="text-amber-100">30:00</strong></span>
+            </div>
+
+            <button onclick="confirmQRPayment()" class="mt-5 w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-white font-extrabold text-sm shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>Saya Sudah Bayar / Konfirmasi</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="admin-login-modal" class="fixed inset-0 z-50 hidden bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-brand-card w-full max-w-md rounded-3xl border border-brand-yellow/30 p-6 sm:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+            <div class="absolute -top-12 -right-12 w-32 h-32 bg-brand-yellow/10 rounded-full blur-2xl"></div>
+            
+            <div class="flex justify-between items-start">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-brand-yellow text-black flex items-center justify-center font-black text-lg shadow-md shadow-brand-yellow/20">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-white text-lg">Admin Login</h3>
+                        <p class="text-xs text-gray-400">Masuk untuk mengelola website Side Brothers</p>
+                    </div>
+                </div>
+                <button onclick="closeAdminLoginModal()" class="text-gray-400 hover:text-white text-sm">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <!-- Default Credentials Notice Banner -->
+            <div class="bg-brand-dark/90 border border-brand-yellow/30 p-3 rounded-2xl text-xs space-y-1">
+                <div class="text-brand-yellow font-bold flex items-center space-x-1.5">
+                    <i class="fa-solid fa-key text-xs"></i>
+                    <span>Kredensial Default:</span>
+                </div>
+                <div class="text-gray-300 font-mono text-[11px] flex justify-between">
+                    <span>Username: <strong class="text-white">admin</strong></span>
+                    <span>Password: <strong class="text-white">admin123</strong></span>
+                </div>
+            </div>
+
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1.5">Username Admin</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute left-3.5 top-3.5 text-gray-500 text-xs"></i>
+                        <input type="text" id="login-username" required placeholder="Masukkan username..." class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-white text-xs focus:outline-none focus:border-brand-yellow transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1.5">Password</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-key absolute left-3.5 top-3.5 text-gray-500 text-xs"></i>
+                        <input type="password" id="login-password" required placeholder="Masukkan password..." class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-white text-xs focus:outline-none focus:border-brand-yellow transition-all">
+                    </div>
+                </div>
+
+                <div id="login-error-msg" class="text-xs text-brand-red hidden flex items-center space-x-1.5">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span id="login-error-text">Username atau password salah!</span>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 rounded-xl bg-brand-yellow hover:bg-yellow-400 text-black font-extrabold text-xs shadow-lg shadow-brand-yellow/20 transition-all flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    <span>Masuk Ke Panel Admin</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="admin-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="bg-brand-card w-full max-w-5xl rounded-3xl border border-brand-border shadow-2xl flex flex-col max-h-[90vh] overflow-hidden">
+            
+            <!-- Admin Header with Logout Button -->
+            <div class="px-6 py-4 bg-brand-dark/90 border-b border-brand-border flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-lg bg-brand-yellow flex items-center justify-center text-black font-black text-xs">
+                        ADM
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-white text-base flex items-center space-x-2">
+                            <span>Side Brothers - Control Panel</span>
+                            <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[9px] font-bold border border-emerald-500/30">Authenticated</span>
+                        </h3>
+                        <p class="text-[11px] text-gray-400">Pengaturan Real-Time Website & Data</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <button onclick="handleAdminLogout()" class="px-3 py-1.5 rounded-xl bg-brand-red/20 border border-brand-red/40 hover:bg-brand-red text-brand-red hover:text-white text-xs font-bold transition-all flex items-center space-x-1.5">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Logout</span>
+                    </button>
+                    <button onclick="closeAdminModal()" class="w-8 h-8 rounded-full bg-brand-border/60 hover:bg-brand-border text-gray-300 hover:text-white flex items-center justify-center transition-colors">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Admin Tabs Nav -->
+            <div class="flex border-b border-brand-border bg-brand-dark/50 px-6 space-x-2 overflow-x-auto">
+                <button onclick="switchAdminTab('members')" id="tab-btn-members" class="admin-tab-btn py-3 px-4 font-bold text-xs text-brand-yellow border-b-2 border-brand-yellow whitespace-nowrap">
+                    <i class="fa-solid fa-users mr-1.5"></i> Kelola Member
+                </button>
+                <button onclick="switchAdminTab('donation')" id="tab-btn-donation" class="admin-tab-btn py-3 px-4 font-bold text-xs text-gray-400 border-b-2 border-transparent hover:text-white whitespace-nowrap">
+                    <i class="fa-solid fa-hand-holding-dollar mr-1.5"></i> Settings Donasi
+                </button>
+                <button onclick="switchAdminTab('inquiries')" id="tab-btn-inquiries" class="admin-tab-btn py-3 px-4 font-bold text-xs text-gray-400 border-b-2 border-transparent hover:text-white whitespace-nowrap relative">
+                    <i class="fa-solid fa-briefcase mr-1.5"></i> Pesan Bisnis
+                    <span id="biz-unread-badge" class="ml-1.5 px-1.5 py-0.5 rounded-full bg-brand-red text-white text-[9px] hidden">0</span>
+                </button>
+                <button onclick="switchAdminTab('donors-history')" id="tab-btn-donors-history" class="admin-tab-btn py-3 px-4 font-bold text-xs text-gray-400 border-b-2 border-transparent hover:text-white whitespace-nowrap">
+                    <i class="fa-solid fa-receipt mr-1.5"></i> Riwayat Donasi
+                </button>
+                <button onclick="switchAdminTab('general')" id="tab-btn-general" class="admin-tab-btn py-3 px-4 font-bold text-xs text-gray-400 border-b-2 border-transparent hover:text-white whitespace-nowrap">
+                    <i class="fa-solid fa-sliders mr-1.5"></i> Teks & Hero
+                </button>
+            </div>
+
+            <!-- Admin Body / Content Panels -->
+            <div class="p-6 overflow-y-auto flex-1 space-y-6">
+
+                <!-- TAB 1: MEMBERS MANAGEMENT -->
+                <div id="admin-tab-members" class="admin-tab-content space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-white text-sm">Daftar Anggota Side Brothers</h4>
+                        <button onclick="openMemberFormModal()" class="px-3.5 py-2 rounded-xl bg-brand-yellow text-black font-extrabold text-xs hover:bg-yellow-400 transition-all flex items-center space-x-1.5">
+                            <i class="fa-solid fa-user-plus"></i>
+                            <span>Tambah Member</span>
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="admin-members-list">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- TAB 2: DONATION SETTINGS -->
+                <div id="admin-tab-donation" class="admin-tab-content space-y-6 hidden">
+                    <h4 class="font-bold text-white text-sm">Pengaturan Campaign Donasi</h4>
+                    <form onsubmit="saveDonationSettings(event)" class="space-y-4 max-w-xl">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Target Donasi (Rp)</label>
+                            <input type="number" id="admin-target-amount" class="w-full px-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-white text-sm focus:outline-none focus:border-brand-yellow">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Jumlah Terkumpul Saat Ini (Rp)</label>
+                            <input type="number" id="admin-collected-amount" class="w-full px-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-white text-sm focus:outline-none focus:border-brand-yellow">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Deskripsi Campaign</label>
+                            <textarea id="admin-donation-desc" rows="3" class="w-full px-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-white text-sm focus:outline-none focus:border-brand-yellow"></textarea>
+                        </div>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand-yellow text-black font-extrabold text-xs hover:bg-yellow-400 transition-all">
+                            Simpan Pengaturan Donasi
+                        </button>
+                    </form>
+                </div>
+
+                <!-- TAB 3: BUSINESS INQUIRIES -->
+                <div id="admin-tab-inquiries" class="admin-tab-content space-y-4 hidden">
+                    <h4 class="font-bold text-white text-sm">Pesan Kerja Sama Bisnis Masuk</h4>
+                    <div id="admin-inquiries-list" class="space-y-3">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- TAB 4: DONATION HISTORY -->
+                <div id="admin-tab-donors-history" class="admin-tab-content space-y-4 hidden">
+                    <h4 class="font-bold text-white text-sm">Riwayat Transaksi Donasi Masuk</h4>
+                    <div id="admin-donors-history-list" class="space-y-3">
+                        <!-- Rendered via JS -->
+                    </div>
+                </div>
+
+                <!-- TAB 5: GENERAL / HERO TEXTS -->
+                <div id="admin-tab-general" class="admin-tab-content space-y-4 hidden">
+                    <h4 class="font-bold text-white text-sm">Pengaturan Teks Hero & Cerita</h4>
+                    <form onsubmit="saveGeneralSettings(event)" class="space-y-4 max-w-2xl">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Hero Badge Text</label>
+                            <input type="text" id="admin-hero-badge" class="w-full px-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-white text-sm focus:outline-none focus:border-brand-yellow">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-300 mb-1">Hero Subtitle</label>
+                            <textarea id="admin-hero-subtitle" rows="3" class="w-full px-4 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-white text-sm focus:outline-none focus:border-brand-yellow"></textarea>
+                        </div>
+                        <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand-yellow text-black font-extrabold text-xs hover:bg-yellow-400 transition-all">
+                            Update Teks
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="member-form-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-brand-card w-full max-w-md rounded-2xl border border-brand-border p-6 space-y-4 shadow-2xl">
+            <h3 class="font-bold text-white text-base" id="member-modal-title">Tambah Member Baru</h3>
+            
+            <form onsubmit="handleSaveMember(event)" class="space-y-3">
+                <input type="hidden" id="member-edit-id">
+                <div>
+                    <label class="block text-xs text-gray-300 mb-1">Nama Lengkap / Panggilan</label>
+                    <input type="text" id="m-name" required class="w-full px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-white text-xs focus:outline-none focus:border-brand-yellow">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-300 mb-1">Peran / Role dalam SideBrothers</label>
+                    <input type="text" id="m-role" required class="w-full px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-white text-xs focus:outline-none focus:border-brand-yellow">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-300 mb-1">URL Avatar / Foto</label>
+                    <input type="text" id="m-avatar" placeholder="https://..." class="w-full px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-white text-xs focus:outline-none focus:border-brand-yellow">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs text-gray-300 mb-1">Instagram URL</label>
+                        <input type="text" id="m-ig" class="w-full px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-white text-xs focus:outline-none focus:border-brand-yellow">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-300 mb-1">TikTok URL</label>
+                        <input type="text" id="m-tiktok" class="w-full px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-white text-xs focus:outline-none focus:border-brand-yellow">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs text-gray-300 mb-1">YouTube URL</label>
+                        <input type="text" id="m-yt" class="w-full px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-white text-xs focus:outline-none focus:border-brand-yellow">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-300 mb-1">Link Shopee / Brand Baju</label>
+                        <input type="text" id="m-shopee" placeholder="https://shopee.co.id/..." class="w-full px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-white text-xs focus:outline-none focus:border-brand-yellow">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-300 mb-1">Nama Brand Baju / Clothing Line</label>
+                    <input type="text" id="m-brand-name" placeholder="Contoh: TEPE WEAR" class="w-full px-3 py-2 rounded-xl bg-brand-dark border border-brand-border text-white text-xs focus:outline-none focus:border-brand-yellow">
+                </div>
+
+                <div class="flex justify-end space-x-2 pt-2">
+                    <button type="button" onclick="closeMemberFormModal()" class="px-4 py-2 rounded-xl bg-brand-dark border border-brand-border text-xs text-gray-300 hover:text-white">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-brand-yellow text-black font-bold text-xs hover:bg-yellow-400">Simpan Member</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- (APPEARS ON TOP OF ADMIN PANEL WITHOUT CLOSING OR HIDING THE ADMIN PANEL) -->
+    <div id="delete-confirm-overlay" class="fixed inset-0 z-[60] hidden bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-brand-card w-full max-w-sm rounded-2xl border border-brand-red/50 p-6 text-center space-y-4 shadow-2xl animate-in fade-in zoom-in-95 duration-150">
+            <div class="w-12 h-12 rounded-full bg-brand-red/20 text-brand-red flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+            </div>
+            <div>
+                <h4 class="text-base font-bold text-white mb-1">Konfirmasi Hapus Data</h4>
+                <p class="text-xs text-gray-300 leading-relaxed" id="delete-confirm-message">
+                    Apakah Anda yakin ingin menghapus data ini? Tindakan ini tidak dapat dibatalkan.
+                </p>
+            </div>
+            <div class="flex items-center space-x-3 pt-2">
+                <button onclick="closeDeleteConfirmModal()" class="w-1/2 py-2.5 rounded-xl bg-brand-dark border border-brand-border text-xs font-semibold text-gray-300 hover:text-white transition-colors">
+                    Batal
+                </button>
+                <button id="confirm-delete-action-btn" class="w-1/2 py-2.5 rounded-xl bg-brand-red hover:bg-red-600 text-white font-bold text-xs shadow-lg shadow-brand-red/20 transition-colors">
+                    Ya, Hapus
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-msg" class="fixed top-24 right-6 z-50 hidden bg-brand-yellow text-black font-bold px-4 py-3 rounded-xl shadow-2xl text-xs flex items-center space-x-2 border border-black/10 transition-all transform translate-y-2">
+        <i class="fa-solid fa-circle-check"></i>
+        <span id="toast-text">Berhasil memperbarui data!</span>
+    </div>
+
+    <script>
+        // DEFAULT DATA
+        const initialMembers = [
+            {
+                id: '1',
+                name: 'Teguh Prakoso (Tepe46)',
+                role: 'Creator & Streamer',
+                avatar: 'https://user41181.na.imgto.link/public/20261012/a9230b4eed4f47b93e33e86b-igexport-dwf2gapcxrt-5.avif',
+                ig: 'https://www.instagram.com/_tepe46/',
+                tiktok: 'https://www.tiktok.com/@_tepe46',
+                yt: 'https://www.youtube.com/@TeguhPrakoso27',
+                shopee: 'https://shopee.co.id/wiseman.brand#product_list',
+                brandName: 'wiseman.brand'
+            },
+            {
+                id: '2',
+                name: 'Niko Junius',
+                role: 'Content Creator',
+                avatar: 'https://user41181.na.imgto.link/public/20261012/42d05b96ae79cc515cc8a5f8-igexport-dwf2gapcxrt-6.avif',
+                ig: 'https://www.instagram.com/nikojunius/',
+                tiktok: 'https://www.tiktok.com/@nikojuniuss',
+                yt: 'https://www.youtube.com/@nikojuniuss',
+                shopee: 'https://shopee.co.id/f51493_jx6#product_list',
+                brandName: 'bangbingbox'
+            },
+            {
+                id: '3',
+                name: 'Yuka Theo',
+                role: 'Streamer & Creator',
+                avatar: 'https://user41181.na.imgto.link/public/20261012/c735e792e06e3d545d05535c-igexport-dwf2gapcxrt-3.avif',
+                ig: 'https://www.instagram.com/yukatheo/',
+                tiktok: 'https://www.tiktok.com/@youktheo',
+                yt: 'https://www.youtube.com/@youktheoo',
+                shopee: 'https://shopee.co.id/mediumugly.id#product_list',
+                brandName: 'mediumugly.id'
+            },
+            {
+                id: '4',
+                name: 'Tierison',
+                role: 'Streamer & Creator',
+                avatar: 'https://user41181.na.imgto.link/public/20261012/b3755fcf0a1663fede6c0333-igexport-dwf2gapcxrt-2.avif',
+                ig: 'https://www.instagram.com/tierison/',
+                tiktok: 'https://www.tiktok.com/@tierisonn',
+                yt: 'https://www.youtube.com/@Tierison',
+                shopee: 'https://shopee.co.id',
+                brandName: 'Tierison Store'
+            }
+        ];
+
+        const initialDonation = {
+            target: 10000000,
+            collected: 3450000,
+            description: 'Bantu kami untuk terus memproduksi konten hiburan berkualitas tinggi, perlengkapan live stream baru, dan event kumpul bareng SideBrothers Fans!'
+        };
+
+        const initialDonors = [
+            { id: 'd1', name: 'Budi Marapthon', amount: 100000, message: 'Semangat bang Tepe & kawan-kawan sofa!', date: '2 jam lalu' },
+            { id: 'd2', name: 'SofaEnjoyer', amount: 250000, message: 'Kalian gokil dari S2 ampe sekarang!', date: '5 jam lalu' },
+            { id: 'd3', name: 'Anonimous', amount: 50000, message: 'Salam dari fans Niko Junius!', date: '1 hari lalu' }
+        ];
+
+        const initialInquiries = [
+            { id: 'b1', name: 'Rian Pratama', email: 'rian@brandlokal.id', company: 'Brand Apparel X', budget: 'Rp 15 - 50 Juta', message: 'Halo Side Brothers, kami mau ajak kolaborasi shirt capsule collection.', date: 'Today, 10:30', isRead: false }
+        ];
+
+        // STATE MANAGERS WITH LOCAL STORAGE
+        let state = {
+            isAdminLoggedIn: JSON.parse(localStorage.getItem('sb_admin_session')) || false,
+            members: JSON.parse(localStorage.getItem('sb_members')) || initialMembers,
+            donation: JSON.parse(localStorage.getItem('sb_donation')) || initialDonation,
+            donors: JSON.parse(localStorage.getItem('sb_donors')) || initialDonors,
+            inquiries: JSON.parse(localStorage.getItem('sb_inquiries')) || initialInquiries,
+            general: JSON.parse(localStorage.getItem('sb_general')) || {
+                badge: 'Official Website SIDE BROTHERS',
+                subtitle: 'Grup konten kreator Indonesia yang berawal dari keisengan nongkrong di pinggir sofa Marapthon Season 2. Sekarang menghibur ratusan ribu penggemar dengan keseruan tanpa batas!'
+            }
+        };
+
+        let currentPendingDonation = null;
+
+        function saveState() {
+            localStorage.setItem('sb_members', JSON.stringify(state.members));
+            localStorage.setItem('sb_donation', JSON.stringify(state.donation));
+            localStorage.setItem('sb_donors', JSON.stringify(state.donors));
+            localStorage.setItem('sb_inquiries', JSON.stringify(state.inquiries));
+            localStorage.setItem('sb_general', JSON.stringify(state.general));
+            localStorage.setItem('sb_admin_session', JSON.stringify(state.isAdminLoggedIn));
+            
+            renderAll();
+        }
+
+        function formatRupiah(number) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast-msg');
+            document.getElementById('toast-text').innerText = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        function handleAdminAccess() {
+            if (state.isAdminLoggedIn) {
+                openAdminModal();
+            } else {
+                openAdminLoginModal();
+            }
+        }
+
+        function openAdminLoginModal() {
+            document.getElementById('login-error-msg').classList.add('hidden');
+            document.getElementById('admin-login-modal').classList.remove('hidden');
+        }
+
+        function closeAdminLoginModal() {
+            document.getElementById('admin-login-modal').classList.add('hidden');
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById('login-username').value;
+            const p = document.getElementById('login-password').value;
+
+            // Default Admin Credentials Verification
+            if (u === 'admin' && p === 'admin123') {
+                state.isAdminLoggedIn = true;
+                saveState();
+                closeAdminLoginModal();
+                openAdminModal();
+                showToast('Login Admin Berhasil! Selamat Datang.');
+            } else {
+                document.getElementById('login-error-text').innerText = 'Username atau Password salah!';
+                document.getElementById('login-error-msg').classList.remove('hidden');
+            }
+        }
+
+        function handleAdminLogout() {
+            state.isAdminLoggedIn = false;
+            saveState();
+            closeAdminModal();
+            showToast('Anda telah logout dari Admin Panel.');
+        }
+
+        // RENDER FUNCTIONS
+        function renderAll() {
+            renderHeroAndGeneral();
+            renderMembers();
+            renderDonationSection();
+            renderAdminMembers();
+            renderAdminDonationSettings();
+            renderAdminInquiries();
+            renderAdminDonorsHistory();
+            updateHeaderAdminBtn();
+        }
+
+        function updateHeaderAdminBtn() {
+            const btnText = document.getElementById('header-admin-btn-text');
+            if (state.isAdminLoggedIn) {
+                btnText.innerText = 'Admin Panel (Active)';
+            } else {
+                btnText.innerText = 'Admin Panel';
+            }
+        }
+
+        function renderHeroAndGeneral() {
+            document.getElementById('hero-badge').innerText = state.general.badge;
+            document.getElementById('hero-subtitle').innerText = state.general.subtitle;
+        }
+
+        function renderMembers() {
+            const container = document.getElementById('members-container');
+            container.innerHTML = state.members.map(member => `
+                <div class="glass-card rounded-3xl overflow-hidden group hover:-translate-y-2 transition-all duration-300 border border-white/10 flex flex-col justify-between">
+                    <div>
+                        <div class="relative h-64 overflow-hidden bg-brand-dark">
+                            <img src="${member.avatar}" alt="${member.name}" onerror="this.src='https://placehold.co/400x400/282B35/FFF?text=${encodeURIComponent(member.name)}'" class="member-photo w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            <div class="absolute inset-0 bg-gradient-to-t from-brand-card via-transparent to-transparent"></div>
+                            <span class="absolute bottom-3 left-3 px-3 py-1 rounded-full bg-brand-dark/90 border border-brand-border text-[10px] font-bold text-brand-yellow uppercase tracking-wider">
+                                ${member.role}
+                            </span>
+                        </div>
+                        <div class="p-5">
+                            <h3 class="font-bold text-white text-lg mb-1">${member.name}</h3>
+                            <p class="text-xs text-gray-400 mb-4">${member.brandName || 'Clothing & Merchandise'}</p>
+                            
+                            <div class="flex items-center space-x-2 text-gray-300 mb-4">
+                                ${member.ig ? `<a href="${member.ig}" target="_blank" class="w-8 h-8 rounded-lg bg-brand-dark flex items-center justify-center hover:bg-brand-yellow hover:text-black transition-colors"><i class="fa-brands fa-instagram text-xs"></i></a>` : ''}
+                                ${member.tiktok ? `<a href="${member.tiktok}" target="_blank" class="w-8 h-8 rounded-lg bg-brand-dark flex items-center justify-center hover:bg-brand-yellow hover:text-black transition-colors"><i class="fa-brands fa-tiktok text-xs"></i></a>` : ''}
+                                ${member.yt ? `<a href="${member.yt}" target="_blank" class="w-8 h-8 rounded-lg bg-brand-dark flex items-center justify-center hover:bg-brand-yellow hover:text-black transition-colors"><i class="fa-brands fa-youtube text-xs"></i></a>` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="px-5 pb-5">
+                        <a href="${member.shopee || '#'}" target="_blank" class="w-full py-2.5 rounded-xl bg-orange-500/10 border border-orange-500/30 hover:bg-orange-500 text-orange-400 hover:text-white font-bold text-xs transition-all flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                            <span>Shopee ${member.brandName ? member.brandName : 'Merch'}</span>
+                        </a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderDonationSection() {
+            document.getElementById('collected-amount').innerText = formatRupiah(state.donation.collected);
+            document.getElementById('target-amount').innerText = formatRupiah(state.donation.target);
+            document.getElementById('donation-desc').innerText = state.donation.description;
+
+            const percentage = Math.min(Math.round((state.donation.collected / state.donation.target) * 100), 100);
+            document.getElementById('donation-progress-bar').style.width = percentage + '%';
+            document.getElementById('progress-percent').innerText = percentage + '%';
+            document.getElementById('donor-count-text').innerText = `${state.donors.length} Pendonor`;
+
+            const donorsList = document.getElementById('recent-donors-list');
+            if (state.donors.length === 0) {
+                donorsList.innerHTML = `<p class="text-xs text-gray-500 text-center py-2">Belum ada donasi. Jadilah yang pertama!</p>`;
+            } else {
+                donorsList.innerHTML = state.donors.slice(0, 5).map(d => `
+                    <div class="flex items-center justify-between bg-brand-dark/60 p-2.5 rounded-xl border border-brand-border/40 text-xs">
+                        <div class="truncate max-w-[180px]">
+                            <span class="font-bold text-white block truncate">${d.name}</span>
+                            <span class="text-[10px] text-gray-400 italic truncate block">${d.message || 'Tanpa pesan'}</span>
+                        </div>
+                        <div class="text-right">
+                            <span class="font-bold text-emerald-400">${formatRupiah(d.amount)}</span>
+                            <span class="text-[9px] text-gray-500 block">${d.date}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function renderAdminMembers() {
+            const list = document.getElementById('admin-members-list');
+            list.innerHTML = state.members.map(m => `
+                <div class="bg-brand-dark p-4 rounded-2xl border border-brand-border flex items-center justify-between space-x-3">
+                    <div class="flex items-center space-x-3 truncate">
+                        <img src="${m.avatar}" onerror="this.src='https://placehold.co/100x100/282B35/FFF?text=Member'" class="member-photo w-12 h-12 rounded-xl object-cover">
+                        <div class="truncate">
+                            <h5 class="font-bold text-white text-xs truncate">${m.name}</h5>
+                            <span class="text-[10px] text-gray-400 block">${m.role}</span>
+                            <span class="text-[10px] text-brand-yellow block font-medium truncate">${m.brandName || 'No Brand'}</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-1.5 flex-shrink-0">
+                        <button onclick="openMemberFormModal('${m.id}')" class="p-2 rounded-lg bg-brand-border text-gray-300 hover:text-white text-xs">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        <button onclick="promptDelete('member', '${m.id}', '${m.name}')" class="p-2 rounded-lg bg-brand-red/20 text-brand-red hover:bg-brand-red hover:text-white text-xs transition-colors">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAdminDonationSettings() {
+            document.getElementById('admin-target-amount').value = state.donation.target;
+            document.getElementById('admin-collected-amount').value = state.donation.collected;
+            document.getElementById('admin-donation-desc').value = state.donation.description;
+        }
+
+        function renderAdminInquiries() {
+            const list = document.getElementById('admin-inquiries-list');
+            const unreadBadge = document.getElementById('biz-unread-badge');
+            
+            const unreadCount = state.inquiries.filter(i => !i.isRead).length;
+            if (unreadCount > 0) {
+                unreadBadge.innerText = unreadCount;
+                unreadBadge.classList.remove('hidden');
+            } else {
+                unreadBadge.classList.add('hidden');
+            }
+
+            if (state.inquiries.length === 0) {
+                list.innerHTML = `<p class="text-xs text-gray-500 py-4 text-center">Belum ada pesan kerja sama masuk.</p>`;
+                return;
+            }
+
+            list.innerHTML = state.inquiries.map(i => `
+                <div class="bg-brand-dark p-4 rounded-2xl border ${i.isRead ? 'border-brand-border' : 'border-brand-yellow/50 bg-brand-yellow/5'} space-y-2">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="font-bold text-white text-xs">${i.name}</span>
+                            <span class="text-[10px] text-gray-400"> (${i.company})</span>
+                            <span class="text-[10px] text-brand-yellow font-bold ml-2">Budget: ${i.budget}</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-[10px] text-gray-500">${i.date}</span>
+                            <button onclick="promptDelete('inquiry', '${i.id}', 'Pesan dari ${i.name}')" class="p-1.5 rounded bg-brand-red/20 text-brand-red hover:bg-brand-red hover:text-white text-xs transition-colors">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-300 bg-brand-card/80 p-2.5 rounded-xl border border-brand-border/40">
+                        ${i.message}
+                    </div>
+                    <div class="text-[10px] text-gray-400">
+                        Email: <a href="mailto:${i.email}" class="text-brand-yellow underline">${i.email}</a>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAdminDonorsHistory() {
+            const list = document.getElementById('admin-donors-history-list');
+            if (state.donors.length === 0) {
+                list.innerHTML = `<p class="text-xs text-gray-500 py-4 text-center">Belum ada riwayat transaksi donasi.</p>`;
+                return;
+            }
+
+            list.innerHTML = state.donors.map(d => `
+                <div class="bg-brand-dark p-3 rounded-2xl border border-brand-border flex items-center justify-between text-xs">
+                    <div>
+                        <div class="font-bold text-white">${d.name}</div>
+                        <div class="text-[10px] text-gray-400">${d.message || 'Tanpa pesan'} • ${d.date}</div>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <span class="font-bold text-emerald-400">${formatRupiah(d.amount)}</span>
+                        <button onclick="promptDelete('donor', '${d.id}', 'Donasi Rp ${d.amount} dari ${d.name}')" class="p-1.5 rounded bg-brand-red/20 text-brand-red hover:bg-brand-red hover:text-white text-xs transition-colors">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('admin-hero-badge').value = state.general.badge;
+            document.getElementById('admin-hero-subtitle').value = state.general.subtitle;
+        }
+
+        function selectPreset(amount) {
+            document.getElementById('custom-amount').value = amount;
+        }
+
+        function handleDonationSubmit(e) {
+            e.preventDefault();
+            const amount = parseInt(document.getElementById('custom-amount').value);
+            const name = document.getElementById('donor-name').value || 'Anonim';
+            const message = document.getElementById('donor-message').value;
+            const method = document.getElementById('payment-method').value;
+
+            if (!amount || amount <= 0) return;
+
+            currentPendingDonation = {
+                id: 'd_' + Date.now(),
+                name: name,
+                amount: amount,
+                message: message,
+                method: method,
+                date: 'Baru saja'
+            };
+
+            showQRModal(currentPendingDonation);
+        }
+
+        function showQRModal(donorData) {
+            document.getElementById('qr-modal-donor').innerText = donorData.name;
+            document.getElementById('qr-modal-amount').innerText = formatRupiah(donorData.amount);
+            document.getElementById('qr-modal-method').innerText = donorData.method;
+
+            const qrContainer = document.getElementById('qrcode-container');
+            qrContainer.innerHTML = '<img src="qris-sidebrothers.png" alt="QRIS Side Brothers" class="w-[170px] h-[170px] object-contain rounded-md">';
+
+            document.getElementById('qr-modal').classList.remove('hidden');
+        }
+
+        function closeQRModal() {
+            document.getElementById('qr-modal').classList.add('hidden');
+            currentPendingDonation = null;
+        }
+
+        function confirmQRPayment() {
+            if (!currentPendingDonation) return;
+
+            state.donors.unshift(currentPendingDonation);
+            state.donation.collected += currentPendingDonation.amount;
+            saveState();
+
+            document.getElementById('donation-form').reset();
+            
+            closeQRModal();
+            showToast('Pembayaran QRIS Berhasil! Terima kasih atas dukungannya.');
+        }
+
+        function handleBusinessSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('biz-name').value;
+            const email = document.getElementById('biz-email').value;
+            const company = document.getElementById('biz-company').value;
+            const budget = document.getElementById('biz-budget').value;
+            const message = document.getElementById('biz-message').value;
+
+            const newInquiry = {
+                id: 'b_' + Date.now(),
+                name,
+                email,
+                company,
+                budget,
+                message,
+                date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                isRead: false
+            };
+
+            state.inquiries.unshift(newInquiry);
+            saveState();
+
+            document.getElementById('business-form').reset();
+            showToast('Proposal Bisnis berhasil dikirim ke Admin Panel Side Brothers!');
+        }
+
+        function openAdminModal() {
+            document.getElementById('admin-modal').classList.remove('hidden');
+            state.inquiries.forEach(i => i.isRead = true);
+            saveState();
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.add('hidden');
+        }
+
+        function switchAdminTab(tabName) {
+            document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                btn.classList.remove('text-brand-yellow', 'border-brand-yellow');
+                btn.classList.add('text-gray-400', 'border-transparent');
+            });
+
+            document.getElementById(`admin-tab-${tabName}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+            activeBtn.classList.add('text-brand-yellow', 'border-brand-yellow');
+            activeBtn.classList.remove('text-gray-400', 'border-transparent');
+        }
+
+        function saveDonationSettings(e) {
+            e.preventDefault();
+            state.donation.target = parseInt(document.getElementById('admin-target-amount').value);
+            state.donation.collected = parseInt(document.getElementById('admin-collected-amount').value);
+            state.donation.description = document.getElementById('admin-donation-desc').value;
+            saveState();
+            showToast('Pengaturan Donasi berhasil diperbarui secara real-time!');
+        }
+
+        function saveGeneralSettings(e) {
+            e.preventDefault();
+            state.general.badge = document.getElementById('admin-hero-badge').value;
+            state.general.subtitle = document.getElementById('admin-hero-subtitle').value;
+            saveState();
+            showToast('Teks Hero berhasil diperbarui!');
+        }
+
+        function openMemberFormModal(memberId = null) {
+            const modal = document.getElementById('member-form-modal');
+            const title = document.getElementById('member-modal-title');
+            
+            if (memberId) {
+                const m = state.members.find(x => x.id === memberId);
+                if (m) {
+                    title.innerText = 'Edit Data Member';
+                    document.getElementById('member-edit-id').value = m.id;
+                    document.getElementById('m-name').value = m.name;
+                    document.getElementById('m-role').value = m.role;
+                    document.getElementById('m-avatar').value = m.avatar;
+                    document.getElementById('m-ig').value = m.ig || '';
+                    document.getElementById('m-tiktok').value = m.tiktok || '';
+                    document.getElementById('m-yt').value = m.yt || '';
+                    document.getElementById('m-shopee').value = m.shopee || '';
+                    document.getElementById('m-brand-name').value = m.brandName || '';
+                }
+            } else {
+                title.innerText = 'Tambah Member Baru';
+                document.getElementById('member-edit-id').value = '';
+                document.getElementById('m-name').value = '';
+                document.getElementById('m-role').value = '';
+                document.getElementById('m-avatar').value = '';
+                document.getElementById('m-ig').value = '';
+                document.getElementById('m-tiktok').value = '';
+                document.getElementById('m-yt').value = '';
+                document.getElementById('m-shopee').value = '';
+                document.getElementById('m-brand-name').value = '';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeMemberFormModal() {
+            document.getElementById('member-form-modal').classList.add('hidden');
+        }
+
+        function handleSaveMember(e) {
+            e.preventDefault();
+            const editId = document.getElementById('member-edit-id').value;
+            const newMember = {
+                id: editId || 'm_' + Date.now(),
+                name: document.getElementById('m-name').value,
+                role: document.getElementById('m-role').value,
+                avatar: document.getElementById('m-avatar').value || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80',
+                ig: document.getElementById('m-ig').value,
+                tiktok: document.getElementById('m-tiktok').value,
+                yt: document.getElementById('m-yt').value,
+                shopee: document.getElementById('m-shopee').value,
+                brandName: document.getElementById('m-brand-name').value
+            };
+
+            if (editId) {
+                const idx = state.members.findIndex(x => x.id === editId);
+                if (idx !== -1) state.members[idx] = newMember;
+            } else {
+                state.members.push(newMember);
+            }
+
+            saveState();
+            closeMemberFormModal();
+            showToast('Member berhasil disimpan!');
+        }
+
+        function promptDelete(type, id, name) {
+            const overlay = document.getElementById('delete-confirm-overlay');
+            const msgEl = document.getElementById('delete-confirm-message');
+            const actionBtn = document.getElementById('confirm-delete-action-btn');
+
+            msgEl.innerHTML = `Apakah Anda yakin ingin menghapus <strong>"${name}"</strong>? Data akan terhapus secara permanen dari website.`;
+
+            actionBtn.onclick = function() {
+                executeDelete(type, id);
+                closeDeleteConfirmModal();
+            };
+
+            overlay.classList.remove('hidden');
+        }
+
+        function closeDeleteConfirmModal() {
+            document.getElementById('delete-confirm-overlay').classList.add('hidden');
+        }
+
+        function executeDelete(type, id) {
+            if (type === 'member') {
+                state.members = state.members.filter(m => m.id !== id);
+                showToast('Member telah dihapus.');
+            } else if (type === 'inquiry') {
+                state.inquiries = state.inquiries.filter(i => i.id !== id);
+                showToast('Pesan bisnis telah dihapus.');
+            } else if (type === 'donor') {
+                const donor = state.donors.find(d => d.id === id);
+                if (donor) {
+                    state.donation.collected = Math.max(0, state.donation.collected - donor.amount);
+                }
+                state.donors = state.donors.filter(d => d.id !== id);
+                showToast('Riwayat donasi dihapus.');
+            }
+
+            saveState();
+        }
+
+        window.onload = function() {
+            renderAll();
+        };
+    </script>
+</body>
+</html>
